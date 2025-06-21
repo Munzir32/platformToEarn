@@ -4,14 +4,18 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Plus, Trophy, ExternalLink, CheckCircle, AlertCircle } from "lucide-react"
+import { Plus, AlertCircle } from "lucide-react"
+import { useWriteContract } from "wagmi"
+import { contract } from "@/contract"
+import ABI from "@/contract/ABI.json"
+import { PlatformIPFS } from "@/lib/ipfsUpload"
+import Manage from "@/components/Manage"
 
 interface Task {
   id: number
@@ -47,6 +51,10 @@ export default function AdminPage() {
   const [tokenSymbol, setTokenSymbol] = useState("")
   const [rewardToken, setRewardToken] = useState("")
   const [rewardAmount, setRewardAmount] = useState("")
+
+  const { writeContractAsync } = useWriteContract()
+
+  const token = "0x33B8d1D5841A989ca3F1566158CE96e260Ff4376"
 
   // Mock data - replace with actual smart contract calls
   useEffect(() => {
@@ -117,33 +125,55 @@ export default function AdminPage() {
     setCreating(true)
 
     // Mock task creation - replace with actual smart contract call
-    setTimeout(() => {
-      const newTask: Task = {
-        id: tasks.length,
-        title,
-        description,
-        tokenGate,
-        tokenSymbol,
-        rewardToken,
-        rewardAmount,
-        submissions: [],
-        maxSubmissions: 3,
-        status: "Open",
-        creator: "0x9876543210fedcba9876543210fedcba98765432",
+    // setTimeout(() => {
+    //   const newTask: Task = {
+    //     id: tasks.length,
+    //     title,
+    //     description,
+    //     tokenGate,
+    //     tokenSymbol,
+    //     rewardToken,
+    //     rewardAmount,
+    //     submissions: [],
+    //     maxSubmissions: 3,
+    //     status: "Open",
+    //     creator: "0x9876543210fedcba9876543210fedcba98765432",
+    //   }
+
+    //   setTasks([...tasks, newTask])
+
+      try {
+          const res = await PlatformIPFS({
+            title: title,
+            description: description,
+            tokenSymbol: tokenSymbol
+          })
+
+
+          const response = await writeContractAsync({
+            address: contract,
+            abi: ABI,
+            functionName: "createTask",
+            args: [tokenGate, tokenGate, 2, res]
+          })
+          
+          console.log(response)
+
+          setTitle("")
+          setDescription("")
+          setTokenGate("")
+          setTokenSymbol("")
+          setRewardToken("")
+          setRewardAmount("")
+      } catch (error) {
+        console.log(error)
       }
 
-      setTasks([...tasks, newTask])
-
       // Reset form
-      setTitle("")
-      setDescription("")
-      setTokenGate("")
-      setTokenSymbol("")
-      setRewardToken("")
-      setRewardAmount("")
+     
 
       setCreating(false)
-    }, 2000)
+    // }, 2000)
   }
 
   const handlePickWinner = async (taskId: number, winnerAddress: string) => {
@@ -317,107 +347,7 @@ export default function AdminPage() {
 
             {/* Manage Tasks Tab */}
             <TabsContent value="manage">
-              <div className="space-y-6">
-                {loading ? (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading tasks...</p>
-                  </div>
-                ) : tasks.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-gray-600 text-lg">No tasks created yet.</p>
-                  </div>
-                ) : (
-                  tasks.map((task) => (
-                    <Card key={task.id} className="bg-white/60 backdrop-blur-sm border-white/20">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-xl mb-2">{task.title}</CardTitle>
-                            <CardDescription>{task.description}</CardDescription>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
-                            {task.winner && (
-                              <Badge variant="outline" className="text-green-600 border-green-200">
-                                <Trophy className="w-3 h-3 mr-1" />
-                                Winner Selected
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                          <div>
-                            <span className="text-sm text-gray-600">Token Required:</span>
-                            <p className="font-semibold">{task.tokenSymbol}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-600">Reward:</span>
-                            <p className="font-semibold">{task.rewardAmount} tokens</p>
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-600">Submissions:</span>
-                            <p className="font-semibold">
-                              {task.submissions.length}/{task.maxSubmissions}
-                            </p>
-                          </div>
-                        </div>
-
-                        {task.submissions.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold mb-3">Submissions:</h4>
-                            <div className="space-y-3">
-                              {task.submissions.map((submission, index) => (
-                                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white/40">
-                                  <div className="flex justify-between items-start mb-2">
-                                    <span className="font-mono text-sm text-gray-600">
-                                      {formatAddress(submission.user)}
-                                    </span>
-                                    <span className="text-xs text-gray-500">{formatDate(submission.timestamp)}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <a
-                                      href={submission.submissionLink}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-purple-600 hover:text-purple-700 text-sm flex items-center gap-1"
-                                    >
-                                      View Submission
-                                      <ExternalLink className="w-3 h-3" />
-                                    </a>
-                                    {task.status !== "Closed" && (
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handlePickWinner(task.id, submission.user)}
-                                        disabled={pickingWinner === task.id}
-                                        className="bg-gradient-to-r from-green-600 to-emerald-600"
-                                      >
-                                        {pickingWinner === task.id ? "Selecting..." : "Pick Winner"}
-                                      </Button>
-                                    )}
-                                  </div>
-                                  {task.winner === submission.user && (
-                                    <div className="mt-2 flex items-center gap-2 text-green-600">
-                                      <CheckCircle className="w-4 h-4" />
-                                      <span className="text-sm font-semibold">Winner!</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {task.submissions.length === 0 && (
-                          <p className="text-gray-500 text-center py-4">No submissions yet</p>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
+              <Manage />
             </TabsContent>
           </Tabs>
         </div>

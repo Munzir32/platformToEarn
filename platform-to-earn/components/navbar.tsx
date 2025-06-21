@@ -5,11 +5,14 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Menu, X, Wallet, LogOut } from "lucide-react"
-
+import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { useAccount } from "wagmi"
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress] = useState("0x1234...5678")
+
+  const { address, isConnected } = useAccount()
 
   const connectWallet = () => {
     setWalletConnected(true)
@@ -42,7 +45,9 @@ export default function Navbar() {
               Admin
             </Link>
 
-            {walletConnected ? (
+            <ConnectButton />
+
+            {/* {walletConnected ? (
               <div className="flex items-center space-x-3">
                 <Badge variant="outline" className="font-mono text-xs">
                   {walletAddress}
@@ -60,7 +65,7 @@ export default function Navbar() {
                 <Wallet className="w-4 h-4 mr-2" />
                 Connect Wallet
               </Button>
-            )}
+            )} */}
           </div>
 
           {/* Mobile menu button */}
@@ -90,7 +95,9 @@ export default function Navbar() {
                 Admin
               </Link>
 
-              {walletConnected ? (
+              <ConnectButton />
+
+              {/* {walletConnected ? (
                 <div className="flex flex-col space-y-2">
                   <Badge variant="outline" className="font-mono text-xs w-fit">
                     {walletAddress}
@@ -113,7 +120,7 @@ export default function Navbar() {
                   <Wallet className="w-4 h-4 mr-2" />
                   Connect Wallet
                 </Button>
-              )}
+              )} */}
             </div>
           </div>
         )}

@@ -14,6 +14,7 @@ contract TaskManager is Ownable {
         address creator;
         address tokenGate; // Token or NFT contract to gate submissions
         address rewardToken; // ERC20 token for reward
+        string details;
         uint256 rewardAmount;
         Submission[] submissions;
         bool isClosed;
@@ -28,6 +29,7 @@ contract TaskManager is Ownable {
     event Submitted(uint256 indexed taskId, address indexed user, string submissionLink);
     event WinnerPicked(uint256 indexed taskId, address indexed winner);
 
+    constructor()Ownable(msg.sender) {}
     /**
      * @notice Create a new task with a token gating condition and ERC20 reward
      * @param _tokenGate The address of the token/NFT required to submit
@@ -37,7 +39,7 @@ contract TaskManager is Ownable {
     function createTask(
         address _tokenGate,
         address _rewardToken,
-        uint256 _rewardAmount
+        uint256 _rewardAmount, string memory details
     ) external {
         require(_rewardToken != address(0), "Invalid reward token");
         require(_rewardAmount > 0, "Reward must be > 0");
@@ -47,6 +49,7 @@ contract TaskManager is Ownable {
 
         Task storage task = tasks[taskCounter];
         task.creator = msg.sender;
+        task.details = details;
         task.tokenGate = _tokenGate;
         task.rewardToken = _rewardToken;
         task.rewardAmount = _rewardAmount;
@@ -113,6 +116,7 @@ contract TaskManager is Ownable {
         address creator,
         address tokenGate,
         address rewardToken,
+        string memory details,
         uint256 rewardAmount,
         Submission[] memory submissions,
         bool isClosed,
@@ -123,6 +127,7 @@ contract TaskManager is Ownable {
             task.creator,
             task.tokenGate,
             task.rewardToken,
+            task.details,
             task.rewardAmount,
             task.submissions,
             task.isClosed,
