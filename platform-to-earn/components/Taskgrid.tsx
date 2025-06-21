@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Badge } from './ui/badge'
-import { Coins, Users } from 'lucide-react'
+import { Coins, Users, Trophy, ExternalLink, CheckCircle, Award, TrendingUp, AlertCircle } from 'lucide-react'
 import { Button } from './ui/button'
 import Link from 'next/link'
-import { useReadContract } from 'wagmi'
+import { useReadContract, useWriteContract, useAccount } from 'wagmi'
 import { contract } from '@/contract'
 import ABI from '@/contract/ABI.json'
 import { fetchIPFSData } from '@/lib/IpfsDataFetch'
+import { useCreatorReputation } from '@/hooks/useCreatorReputation'
 
 interface Submission {
   user: string
@@ -49,6 +50,9 @@ const Taskgrid: React.FC<TaskgridProps> = ({ taskId }) => {
     functionName: 'getTask',
     args: [BigInt(taskId)],
   })
+
+  // Get creator reputation
+  const { stats: creatorStats } = useCreatorReputation(task?.creator || '')
 
   const processTaskData = useCallback(() => {
     if (!taskData || !Array.isArray(taskData)) {
@@ -163,9 +167,22 @@ const Taskgrid: React.FC<TaskgridProps> = ({ taskId }) => {
           <CardTitle className="text-lg line-clamp-2">{taskDetails?.title}</CardTitle>
           <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
         </div>
-        <CardDescription className="line-clamp-3">{taskDetails?.description}</CardDescription>
+        <CardDescription className="line-clamp-3 flex items-center gap-2">
+          <span>Created by {task.creator.slice(0, 6)}...{task.creator.slice(-4)}</span>
+          {creatorStats && (
+            <Badge variant="outline" className="text-xs">
+              {creatorStats.reputation === 'Excellent' && <Award className="w-3 h-3 mr-1" />}
+              {creatorStats.reputation === 'Good' && <TrendingUp className="w-3 h-3 mr-1" />}
+              {creatorStats.reputation === 'Fair' && <AlertCircle className="w-3 h-3 mr-1" />}
+              {creatorStats.reputation === 'Poor' && <AlertCircle className="w-3 h-3 mr-1" />}
+              {creatorStats.reputation}
+            </Badge>
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent>
+        <p className="text-gray-600 mb-3 line-clamp-2">{taskDetails?.description}</p>
+        
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Token Required:</span>

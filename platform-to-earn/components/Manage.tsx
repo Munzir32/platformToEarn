@@ -1,9 +1,7 @@
 'use client'
 import React from 'react'
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trophy, ExternalLink, CheckCircle, AlertCircle, RefreshCw } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useWriteContract, useReadContract, useAccount } from "wagmi"
 import { contract } from "@/contract"
@@ -15,36 +13,18 @@ interface Submission {
     submissionLink: string
 }
 
-interface Task {
-    id: number
-    creator: string
-    tokenGate: string
-    rewardToken: string
-    details: string
-    rewardAmount: string
-    submissions: Submission[]
-    isClosed: boolean
-    winner?: string
-    status: "Open" | "Full" | "Closed"
-    maxSubmissions: number
-}
+
 
 const Manage = () => {
-    const [pickingWinner, setPickingWinner] = useState<number | null>(null)
     const [refreshing, setRefreshing] = useState(false)
     const [taskIds, setTaskIds] = useState<Map<string, string>>(new Map())
-    const { address } = useAccount()
 
-    // Read task counter from contract
     const { data: taskCounter, refetch: refetchTaskCounter } = useReadContract({
         address: contract as `0x${string}`,
         abi: ABI,
         functionName: 'taskCounter',
     })
 
-    console.log(taskCounter)
-
-    const { writeContract, isPending: isPickingWinner } = useWriteContract()
 
     const getTaskIds = useCallback(() => {
         try {
@@ -79,39 +59,9 @@ const Manage = () => {
 
   
 
-    const handlePickWinner = async (taskId: number, winnerAddress: string) => {
-        setPickingWinner(taskId)
-
-        try {
-            await writeContract({
-                address: contract as `0x${string}`,
-                abi: ABI,
-                functionName: 'pickWinner',
-                args: [BigInt(taskId), winnerAddress as `0x${string}`],
-            })
-
-            // Refresh data after successful transaction
-            await refetchTaskCounter()
-        } catch (error) {
-            console.error('Error picking winner:', error)
-        } finally {
-            setPickingWinner(null)
-        }
-    }
 
 
-    const getStatusColor = useMemo(() => (status: string) => {
-        switch (status) {
-            case "Open":
-                return "bg-green-100 text-green-800 border-green-200"
-            case "Full":
-                return "bg-yellow-100 text-yellow-800 border-yellow-200"
-            case "Closed":
-                return "bg-gray-100 text-gray-800 border-gray-200"
-            default:
-                return "bg-gray-100 text-gray-800 border-gray-200"
-        }
-    }, [])
+
 
 
     const loading = !taskCounter && taskIds.size === 0

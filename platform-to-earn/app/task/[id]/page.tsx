@@ -17,6 +17,7 @@ import { contract } from "@/contract"
 import ABI from "@/contract/ABI.json"
 import { fetchIPFSData } from '@/lib/IpfsDataFetch'
 import { ConnectButton } from "@rainbow-me/rainbowkit"
+import CreatorReputation from "@/components/CreatorReputation"
 
 // ERC20 ABI for balance checking
 const ERC20_ABI = [
@@ -375,6 +376,9 @@ export default function TaskDetailPage() {
               <p className="text-gray-700 leading-relaxed">{taskDetails?.description}</p>
             </CardContent>
           </Card>
+
+          {/* Creator Reputation */}
+          <CreatorReputation creatorAddress={task.creator} className="mb-8" />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Submission Form */}

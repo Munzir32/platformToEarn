@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, ExternalLink, CheckCircle } from "lucide-react"
+import { Trophy, ExternalLink, CheckCircle, Award, TrendingUp, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { contract } from "@/contract"
 import ABI from "@/contract/ABI.json"
 import { useReadContract, useWriteContract, useAccount } from 'wagmi'
 import { fetchIPFSData } from '@/lib/IpfsDataFetch'
+import { useCreatorReputation } from '@/hooks/useCreatorReputation'
 
 interface Submission {
     user: string
@@ -52,6 +53,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ id }) => {
         functionName: 'getTask',
         args: [BigInt(id)],
     })
+
+    // Get creator reputation
+    const { stats: creatorStats } = useCreatorReputation(task?.creator || '')
 
     // Process task data
     const processTaskData = useCallback(() => {
@@ -182,7 +186,18 @@ const TaskCard: React.FC<TaskCardProps> = ({ id }) => {
                 <div className="flex justify-between items-start">
                     <div>
                         <CardTitle className="text-xl mb-2">{taskDetails?.title}</CardTitle>
-                        <CardDescription>{taskDetails?.description}</CardDescription>
+                        <CardDescription className="flex items-center gap-2">
+                            Created by {formatAddress(task.creator)}
+                            {creatorStats && (
+                                <Badge variant="outline" className="text-xs">
+                                    {creatorStats.reputation === 'Excellent' && <Award className="w-3 h-3 mr-1" />}
+                                    {creatorStats.reputation === 'Good' && <TrendingUp className="w-3 h-3 mr-1" />}
+                                    {creatorStats.reputation === 'Fair' && <AlertCircle className="w-3 h-3 mr-1" />}
+                                    {creatorStats.reputation === 'Poor' && <AlertCircle className="w-3 h-3 mr-1" />}
+                                    {creatorStats.reputation}
+                                </Badge>
+                            )}
+                        </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
@@ -196,6 +211,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ id }) => {
                 </div>
             </CardHeader>
             <CardContent>
+                <p className="text-gray-600 mb-4">{taskDetails?.description}</p>
+                
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                         <span className="text-sm text-gray-600">Token Gate:</span>

@@ -44,6 +44,9 @@ export default function Navbar() {
             <Link href="/admin" className="text-gray-700 hover:text-purple-600 transition-colors">
               Admin
             </Link>
+            <Link href="/reputation-demo" className="text-gray-700 hover:text-purple-600 transition-colors">
+              Reputation Demo
+            </Link>
 
             <ConnectButton />
 
@@ -93,6 +96,13 @@ export default function Navbar() {
                 onClick={() => setIsOpen(false)}
               >
                 Admin
+              </Link>
+              <Link
+                href="/reputation-demo"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Reputation Demo
               </Link>
 
               <ConnectButton />
