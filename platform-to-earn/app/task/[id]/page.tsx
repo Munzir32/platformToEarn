@@ -94,6 +94,17 @@ export default function TaskDetailPage() {
     args: [BigInt(taskId)],
   })
 
+  // Check if user has already submitted to this task
+  const { data: hasUserSubmitted } = useReadContract({
+    address: contract as `0x${string}`,
+    abi: ABI,
+    functionName: 'hasSubmitted',
+    args: [BigInt(taskId), address as `0x${string}`],
+    query: {
+      enabled: !!address && !!taskId,
+    },
+  })
+
   // Check if user has required token using Nodit API
   const checkTokenBalance = useCallback(async (userAddress: string, tokenGateAddress: string) => {
     if (!userAddress || !tokenGateAddress) return false
@@ -227,8 +238,9 @@ export default function TaskDetailPage() {
       setHasSubmitted(true)
       setSubmissionLink("")
       
-      // Refresh task data to show new submission
-      // You might want to add a refetch mechanism here
+      // Note: The hasSubmitted state will be automatically updated via the useReadContract hook
+      // when the transaction is confirmed and the contract state changes
+      
     } catch (error) {
       console.error('Error submitting to task:', error)
     } finally {
@@ -272,6 +284,13 @@ export default function TaskDetailPage() {
       setHasRequiredToken(false)
     }
   }, [address, task?.tokenGate, checkTokenBalance])
+
+  // Update hasSubmitted state based on contract data
+  useEffect(() => {
+    if (hasUserSubmitted !== undefined) {
+      setHasSubmitted(Boolean(hasUserSubmitted))
+    }
+  }, [hasUserSubmitted])
 
   if (loading) {
     return (

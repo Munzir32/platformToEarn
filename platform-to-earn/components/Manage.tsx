@@ -44,10 +44,8 @@ const Manage = () => {
 
     console.log(taskCounter)
 
-    // Write contract for picking winner
     const { writeContract, isPending: isPickingWinner } = useWriteContract()
 
-    // Generate task IDs map
     const getTaskIds = useCallback(() => {
         try {
             if (!taskCounter) {
@@ -73,19 +71,14 @@ const Manage = () => {
         getTaskIds()
     }, [taskCounter, getTaskIds])
 
-    // Optimized refresh function
     const handleRefresh = async () => {
         setRefreshing(true)
         await refetchTaskCounter()
         setRefreshing(false)
     }
 
-    // Memoized address formatter
-    const formatAddress = useMemo(() => (address: string) => {
-        return `${address.slice(0, 6)}...${address.slice(-4)}`
-    }, [])
+  
 
-    // Handle picking winner with real contract call
     const handlePickWinner = async (taskId: number, winnerAddress: string) => {
         setPickingWinner(taskId)
 
@@ -106,18 +99,7 @@ const Manage = () => {
         }
     }
 
-    // Memoized date formatter
-    const formatDate = useMemo(() => (timestamp: string) => {
-        return new Date(timestamp).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        })
-    }, [])
 
-    // Memoized status color getter
     const getStatusColor = useMemo(() => (status: string) => {
         switch (status) {
             case "Open":
@@ -131,21 +113,6 @@ const Manage = () => {
         }
     }, [])
 
-    // Parse task details to extract title and description
-    const parseTaskDetails = (details: string) => {
-        try {
-            const parsed = JSON.parse(details)
-            return {
-                title: parsed.title || "Untitled Task",
-                description: parsed.description || "No description provided"
-            }
-        } catch {
-            return {
-                title: "Untitled Task",
-                description: details || "No description provided"
-            }
-        }
-    }
 
     const loading = !taskCounter && taskIds.size === 0
 
