@@ -1,4 +1,16 @@
-const fetch = require('node-fetch'); // If using Node.js <18
+// --- PlatformToEarn Webhook Listener ---
+//
+// For Railway deployment:
+// 1. Set EMAIL_USER and EMAIL_PASS as environment variables in Railway dashboard.
+// 2. Locally, create a .env file with:
+//      EMAIL_USER=platformtoearn@gmail.com
+//      EMAIL_PASS=Platformtoearn@123
+// 3. Do NOT commit .env to git.
+// --------------------------------------
+
+require('dotenv').config(); 
+
+const fetch = require('node-fetch'); 
 
 const url = 'https://web3.nodit.io/v1/ethereum/sepolia/webhooks';
 const options = {
@@ -22,8 +34,6 @@ fetch(url, options)
   .then(json => console.log(json))
   .catch(err => console.error(err));
 
-// --- Webhook Listener and Email Notification Demo ---
-// To run: npm install express body-parser nodemailer
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -43,19 +53,16 @@ const addressToEmail = {
 const transporter = nodemailer.createTransport({
   service: 'gmail', // e.g., 'gmail', or use your SMTP provider
   auth: {
-    user: 'platformtoearn@gmail.com',
-    pass: 'Platformtoearn@123',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-// In-memory store for demo; use a DB in production
 let rewardEvents = [];
 
-// Update webhook handler to store reward events
 app.post('/api/webhook-listener', (req, res) => {
   const event = req.body;
 
-  // Example: TOKEN_TRANSFER event
   if (event && event.data && event.data.to) {
     const toAddress = event.data.to;
     const email = addressToEmail[toAddress];
@@ -63,7 +70,7 @@ app.post('/api/webhook-listener', (req, res) => {
     if (email) {
       // Send email notification
       transporter.sendMail({
-        from: 'platformtoearn@gmail.com',
+        from: process.env.EMAIL_USER,
         to: email,
         subject: 'You received a reward!',
         text: `Congratulations! You received a reward of ${event.data.value}. Tx: ${event.data.transactionHash}`,
@@ -91,11 +98,9 @@ app.post('/api/webhook-listener', (req, res) => {
   }
 });
 
-// New endpoint to fetch rewards for a wallet
 app.get('/api/rewards', (req, res) => {
   const { address } = req.query;
   if (!address) return res.status(400).json({ error: 'Missing address' });
-  // Return recent rewards for this address
   const events = rewardEvents.filter(e => e.to.toLowerCase() === address.toLowerCase());
   res.json(events);
 });
@@ -104,4 +109,3 @@ app.listen(PORT, () => {
   console.log(`Webhook listener running on port ${PORT}`);
 });
 
-// --- End of Webhook Listener Demo ---

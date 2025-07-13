@@ -6,7 +6,8 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "webhook": "node NoditWebhook.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -52,6 +53,8 @@
     "next": "15.2.4",
     "next-themes": "^0.4.4",
     "nodemailer": "^7.0.5",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.6.7",
     "react": "^19",
     "react-day-picker": "8.10.1",
     "react-dom": "^19",
