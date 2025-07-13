@@ -47,6 +47,9 @@ export default function Navbar() {
             <Link href="/reputation-demo" className="text-gray-700 hover:text-purple-600 transition-colors">
               Reputation Demo
             </Link>
+            <Link href="/token-pricing-demo" className="text-gray-700 hover:text-purple-600 transition-colors">
+              Token Pricing
+            </Link>
 
             <ConnectButton />
 
@@ -103,6 +106,13 @@ export default function Navbar() {
                 onClick={() => setIsOpen(false)}
               >
                 Reputation Demo
+              </Link>
+              <Link
+                href="/token-pricing-demo"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Token Pricing
               </Link>
 
               <ConnectButton />

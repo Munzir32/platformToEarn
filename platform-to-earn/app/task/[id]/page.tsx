@@ -18,6 +18,7 @@ import ABI from "@/contract/ABI.json"
 import { fetchIPFSData } from '@/lib/IpfsDataFetch'
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import CreatorReputation from "@/components/CreatorReputation"
+import RewardValue from "@/components/RewardValue"
 
 // ERC20 ABI for balance checking
 const ERC20_ABI = [
@@ -360,8 +361,11 @@ export default function TaskDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-green-600" />
-                  <span className="font-semibold">{task.rewardAmount} tokens</span>
+                  <RewardValue 
+                    tokenAddress={task.rewardToken}
+                    amount={task.rewardAmount}
+                    showDetails={false}
+                  />
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -374,6 +378,20 @@ export default function TaskDetailPage() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-700 leading-relaxed">{taskDetails?.description}</p>
+            </CardContent>
+          </Card>
+
+          {/* Reward Value Details */}
+          <Card className="bg-white/60 backdrop-blur-sm border-white/20 mb-8">
+            <CardHeader>
+              <CardTitle className="text-xl">Reward Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RewardValue 
+                tokenAddress={task.rewardToken}
+                amount={task.rewardAmount}
+                showDetails={true}
+              />
             </CardContent>
           </Card>
 

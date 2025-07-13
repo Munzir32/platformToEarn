@@ -9,6 +9,7 @@ import { contract } from '@/contract'
 import ABI from '@/contract/ABI.json'
 import { fetchIPFSData } from '@/lib/IpfsDataFetch'
 import { useCreatorReputation } from '@/hooks/useCreatorReputation'
+import RewardValue from './RewardValue'
 
 interface Submission {
   user: string
@@ -193,8 +194,11 @@ const Taskgrid: React.FC<TaskgridProps> = ({ taskId }) => {
 
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Coins className="w-4 h-4 text-green-600" />
-              <span className="font-semibold">{task.rewardAmount} tokens</span>
+              <RewardValue 
+                tokenAddress={task.rewardToken}
+                amount={task.rewardAmount}
+                showDetails={false}
+              />
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-blue-600" />
